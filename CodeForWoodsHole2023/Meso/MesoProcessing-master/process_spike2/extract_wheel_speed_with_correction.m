@@ -1,4 +1,4 @@
-function [wheel_speed, wheel_on, wheel_off] = extract_wheel_speed_with_correction(wheel_position,fs,wheel_diameter,varargin)
+function [wheel_speed, wheel_on, wheel_off,distance] = extract_wheel_speed_with_correction(wheel_position,fs,wheel_diameter,varargin)
 %% EXTRACT_WHEEL_SPEED_WITH_CORRECTION converts voltage position to wheel speed while correction for nonlinearities in reported wheel position
 % wheel_position: A vector containing continuous voltage measurements
 %                   reflecting wheel position
@@ -149,7 +149,8 @@ if false & length(finalHighLocs) > 30 & length(finalLowLocs) > 30
     
 else
     %% didn't have enough fast bouts of locomotion, so lack of correction shouldn't matter anyway
-    wheel_speed = -filter(w,1,(diff(medfilt1(unwrap(wheel_angle),3))))*fs*0.5*wheel_diameter;
+    distance = -medfilt1(unwrap(wheel_angle),3);
+    wheel_speed = filter(w,1,(diff(distance)))*fs*0.5*wheel_diameter;
 end
 
 
@@ -176,6 +177,11 @@ end
 
 
 
+end
 
+function y = reluFun(x)
+    y = zeros(size(x));
+    y(x>0) = x(x>0);
+end
     
 
