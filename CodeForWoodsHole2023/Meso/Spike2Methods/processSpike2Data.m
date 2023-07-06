@@ -30,9 +30,10 @@ for i = 1:length(spike2Fields)
         elseif contains(spike2Fields{i},'Vis','IgnoreCase',true)
             [processedSpike2Data.diodeOnTimestamps,processedSpike2Data.diodeOffTimestamps]=analogSigToTimestamps(spike2Data.(spike2Fields{i}).data,timestamps);
         elseif contains(spike2Fields{i},'wheel','IgnoreCase',true)
-            [processedSpike2Data.wheelSpeed,wheel_on,wheel_off] = extract_wheel_speed_with_correction(spike2Data.(spike2Fields{i}).data,5000,15,'MinLocomotionSpeed',1);
+            [processedSpike2Data.wheelSpeed,wheel_on,wheel_off,distance] = extract_wheel_speed_with_correction(spike2Data.(spike2Fields{i}).data,5000,15,'MinLocomotionSpeed',1);
              processedSpike2Data.wheelOn = timestamps(wheel_on);
              processedSpike2Data.wheelOff = timestamps(wheel_off);
+             processedSpike2Data.distance = distance;
         elseif contains(spike2Fields{i},'Air','IgnoreCase',true)
             [processedSpike2Data.airPuffOnTimestamps,processedSpike2Data.airPuffOffTimestamps]=analogSigToTimestamps(spike2Data.(spike2Fields{i}).data,timestamps);
         elseif contains(spike2Fields{i},'pupil','IgnoreCase',true)
@@ -41,6 +42,8 @@ for i = 1:length(spike2Fields)
             [processedSpike2Data.bodyFrameOnTimestamps,processedSpike2Data.bodyFrameOffTimestamps]=analogSigToTimestamps(spike2Data.(spike2Fields{i}).data,timestamps);
         elseif contains(spike2Fields{i},'LFP') || contains(spike2Fields{i},'ECoG','IgnoreCase',true)
             processedSpike2Data.ECoG = spike2Data.(spike2Fields{i}).data;
+        elseif contains(spike2Fields{i},'key','IgnoreCase',true)
+            processedSpike2Data.(spike2Fields{i}) =  spike2Data.(spike2Fields{i}).data/spike2Data.(spike2Fields{i}).samplingRate;        
         else
             [processedSpike2Data.([spike2Fields{i} 'OnTimestamps']), processedSpike2Data.([spike2Fields{i} 'OffTimestamps'])]=analogSigToTimestamps(spike2Data.(spike2Fields{i}).data,timestamps);
             warning(['Unindetified channel name: ' spike2Fields{i} ', treating as timestamp data']);

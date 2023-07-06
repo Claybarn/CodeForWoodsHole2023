@@ -48,17 +48,29 @@ for i =1:10
 end
 spike2Data = struct;
 for ichan=1:iChanNum
-    %file name, channel num, max num of points, start and end time in ticks
-    [fRead,fVals,i64Time] = CEDS64ReadWaveF(fhand,ichan,maxTimeTicks,0,maxTimeTicks);
-    if fRead > 0
-        [ ~, sTitleOut ]=CEDS64ChanTitle(fhand,ichan);
-        sTitleOut = strrep(sTitleOut,' ','');
-        sTitleOut = strrep(sTitleOut,'_','');
-        sTitleOut = regexp(sTitleOut,'[A-z]\w+','match');
-        dataBundle.data = double(fVals);
-        dataBundle.samplingRate = double(fRead/(dsec * maxTimeTicks));
-        dataBundle.acquisitionOffset = double(i64Time/(dsec * maxTimeTicks));
-        spike2Data.(sTitleOut{:}) = dataBundle;
+    [ iType ] = CEDS64ChanType( fhand, ichan );
+    switch iType
+        case 1
+            %file name, channel num, max num of points, start and end time in ticks
+            [fRead,fVals,i64Time] = CEDS64ReadWaveF(fhand,ichan,maxTimeTicks,0,maxTimeTicks);
+            [ ~, sTitleOut ]=CEDS64ChanTitle(fhand,ichan);
+            sTitleOut = strrep(sTitleOut,' ','');
+            sTitleOut = strrep(sTitleOut,'_','');
+            sTitleOut = regexp(sTitleOut,'[A-z]\w+','match');
+            dataBundle.data = double(fVals);
+            dataBundle.samplingRate = double(fRead/(dsec * maxTimeTicks));
+            dataBundle.acquisitionOffset = double(i64Time/(dsec * maxTimeTicks));
+            spike2Data.(sTitleOut{:}) = dataBundle;
+        case 5
+            % should be read markers, but hangs indefinately
+            [ ~, cMarkers ] = CEDS64ReadEvents( fhand, ichan, maxTimeTicks, 0, maxTimeTicks);
+            [ ~, sTitleOut ]=CEDS64ChanTitle(fhand,ichan);
+            sTitleOut = strrep(sTitleOut,' ','');
+            sTitleOut = strrep(sTitleOut,'_','');
+            sTitleOut = regexp(sTitleOut,'[A-z]\w+','match');
+            dataBundle.data = double(cMarkers);
+            dataBundle.samplingRate = 1/dsec;
+            spike2Data.(sTitleOut{:}) = dataBundle;
     end
 end
 
